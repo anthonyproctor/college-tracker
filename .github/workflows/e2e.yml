@@ -1,0 +1,111 @@
+name: End-to-End Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3] # Run tests in parallel across 3 containers
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: |
+        npm ci
+        cd backend && npm ci
+    
+    - name: Verify Cypress
+      run: npx cypress verify
+    
+    - name: Start Backend Server
+      run: |
+        cd backend
+        npm start &
+        npx wait-on http://localhost:5001
+      env:
+        NODE_ENV: test
+        MONGODB_URI: mongodb://localhost:27017/college-tracker-test
+        JWT_SECRET: test-secret-key
+        JWT_EXPIRE: 1h
+    
+    - name: Start Frontend Server
+      run: |
+        npx http-server -p 3000 &
+        npx wait-on http://localhost:3000
+    
+    - name: Run Cypress Tests
+      uses: cypress-io/github-action@v5
+      with:
+        browser: chrome
+        record: false
+        parallel: true
+        group: 'UI - Chrome'
+        spec: cypress/e2e/**/*
+        wait-on: 'http://localhost:3000,http://localhost:5001'
+        config-file: cypress.config.js
+      env:
+        CYPRESS_baseUrl: http://localhost:3000
+        CYPRESS_API_URL: http://localhost:5001/api/v1
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload Screenshots
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots-${{ matrix.containers }}
+        path: cypress/screenshots
+        retention-days: 5
+    
+    - name: Generate Test Report
+      run: |
+        npx mochawesome-merge cypress/reports/*.json > cypress/reports/full_report.json
+        npx mochawesome-report-generator cypress/reports/full_report.json
+    
+    - name: Upload Test Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: cypress-report-${{ matrix.containers }}
+        path: mochawesome-report
+        retention-days: 5
+
+  notify:
+    needs: cypress
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Test Status
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const testStatus = '${{ needs.cypress.result }}'
+          const success = testStatus === 'success'
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `End-to-End Tests ${success ? 'passed ✅' : 'failed ❌'}\n\nView test reports in the workflow artifacts.`
+          })

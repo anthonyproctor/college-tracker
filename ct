@@ -41,14 +41,17 @@ show_help() {
     echo
     echo "  test:"
     echo "    backend   Run backend tests"
+    echo "    e2e      Run end-to-end tests"
+    echo "    e2e --open  Open Cypress test runner"
     echo "    watch    Run tests in watch mode"
     echo "    coverage Generate test coverage report"
+    echo "    all      Run all tests (backend + e2e)"
     echo
     echo "Examples:"
     echo "  ./ct dev              # Start development servers"
     echo "  ./ct deploy           # Deploy to production"
-    echo "  ./ct monitor dev      # Monitor development environment"
-    echo "  ./ct test backend     # Run backend tests"
+    echo "  ./ct test e2e        # Run end-to-end tests"
+    echo "  ./ct test all        # Run all tests"
 }
 
 # Check if command exists
@@ -143,13 +146,24 @@ case "$1" in
             "backend")
                 cd backend && NODE_ENV=test npm test
                 ;;
+            "e2e")
+                if [ "$3" == "--open" ]; then
+                    npm run test:e2e:open
+                else
+                    npm run test:e2e
+                fi
+                ;;
             "watch")
                 cd backend && NODE_ENV=test npm run test:watch
                 ;;
             "coverage")
                 cd backend && NODE_ENV=test npm run test:coverage
                 ;;
+            "all")
+                npm run test:all
+                ;;
             *)
+                echo -e "${YELLOW}Running all backend tests...${NC}"
                 cd backend && NODE_ENV=test npm test
                 ;;
         esac

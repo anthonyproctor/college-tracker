@@ -9,6 +9,7 @@ dotenv.config();
 // Route files
 const auth = require('./routes/auth');
 const applications = require('./routes/applications');
+const test = process.env.NODE_ENV === 'test' ? require('./routes/test') : null;
 
 // Create Express app
 const app = express();
@@ -51,6 +52,9 @@ if (process.env.NODE_ENV !== 'test') {
 // Mount routers
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/applications', applications);
+if (process.env.NODE_ENV === 'test') {
+    app.use('/api/v1/test', test);
+}
 
 // Basic route
 app.get('/', (req, res) => {
