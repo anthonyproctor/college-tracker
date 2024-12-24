@@ -14,63 +14,56 @@ if ! command -v netlify &> /dev/null; then
     npm install -g netlify-cli
 fi
 
+# Create new site if not exists
+echo -e "\n${YELLOW}Checking Netlify site...${NC}"
+if ! netlify status &> /dev/null; then
+    echo "Creating new Netlify site..."
+    netlify sites:create --name college-tracker
+fi
+
+# Get site ID
+SITE_ID=$(netlify api getSite | jq -r '.id')
+
 # Configure build settings
 echo -e "\n${YELLOW}Configuring build settings...${NC}"
-netlify build:settings set --dir="."
-netlify build:settings set --command=""
+netlify link
+netlify build:settings update --publish="." --framework="#static"
 
-# Configure deploy contexts
-echo -e "\n${YELLOW}Configuring deploy contexts...${NC}"
-netlify env:set REACT_APP_API_URL "https://college-tracker-api.onrender.com/api/v1" --scope production
-netlify env:set REACT_APP_API_URL "https://college-tracker-api-staging.onrender.com/api/v1" --scope deploy-preview
+# Configure environment variables
+echo -e "\n${YELLOW}Configuring environment variables...${NC}"
+netlify env:set API_URL "https://college-tracker-api.onrender.com/api/v1" --context production
+netlify env:set API_URL "https://college-tracker-api-staging.onrender.com/api/v1" --context deploy-preview
+
+# Enable branch deploys and deploy previews
+echo -e "\n${YELLOW}Configuring deployment settings...${NC}"
+netlify sites:update $SITE_ID --json \
+  --branch-deploy=true \
+  --deploy-preview=true \
+  --auto-publish=true
 
 # Configure deploy notifications
-echo -e "\n${YELLOW}Configuring deploy notifications...${NC}"
-netlify api createHookDefinition --data '{
-    "site_id": "'$(netlify api getSite | jq -r .id)'",
-    "event": "deploy_succeeded",
-    "data": {
-        "url": "https://api.github.com/repos/anthonyproctor/college-tracker/statuses/${COMMIT_REF}",
-        "headers": {
-            "Authorization": "token ${GITHUB_TOKEN}"
-        },
-        "body": {
-            "state": "success",
-            "description": "Deploy preview ready!",
-            "context": "netlify/deploy-preview"
-        }
-    }
-}'
+echo -e "\n${YELLOW}Setting up GitHub integration...${NC}"
+if [ -n "$GITHUB_TOKEN" ]; then
+    netlify integration:setup --auth $GITHUB_TOKEN
+else
+    echo -e "${YELLOW}Skipping GitHub integration (GITHUB_TOKEN not set)${NC}"
+fi
 
-# Configure branch deploys
-echo -e "\n${YELLOW}Configuring branch deploy settings...${NC}"
-netlify api updateSite --data '{
-    "site_id": "'$(netlify api getSite | jq -r .id)'",
-    "build_settings": {
-        "allowed_branches": ["main", "develop"],
-        "branch_deploy_enabled": true,
-        "deploy_preview_enabled": true
-    }
-}'
-
-# Configure deploy hooks
-echo -e "\n${YELLOW}Creating deploy hooks...${NC}"
-netlify api createHook --data '{
-    "site_id": "'$(netlify api getSite | jq -r .id)'",
-    "type": "url",
-    "event": "deploy_succeeded",
-    "data": {
-        "url": "https://api.render.com/v1/services/srv-something/deploys"
-    }
-}'
+# Create deploy hook for backend service
+echo -e "\n${YELLOW}Creating deploy hook...${NC}"
+HOOK_URL=$(netlify deploy-hooks:create college-tracker --branch main)
+echo "Deploy hook URL: $HOOK_URL"
+echo -e "${YELLOW}Add this URL to your Render service's deploy hooks${NC}"
 
 echo -e "\n${GREEN}Netlify configuration complete!${NC}"
 echo -e "\n${YELLOW}Next steps:${NC}"
-echo "1. Visit your Netlify dashboard to verify settings"
-echo "2. Set up environment variables in Netlify dashboard"
-echo "3. Configure custom domain (if needed)"
+echo "1. Visit Netlify dashboard to verify settings:"
+echo "   netlify open"
+echo "2. Add the deploy hook URL to your Render service"
+echo "3. Configure custom domain (if needed):"
+echo "   netlify domains:add your-domain.com"
 echo "4. Test automatic deployments by pushing changes"
-echo -e "\n${YELLOW}Commands:${NC}"
-echo "netlify open          # Open Netlify dashboard"
-echo "netlify deploy        # Manual deploy"
-echo "netlify env:list      # List environment variables"
+
+# Open Netlify dashboard
+echo -e "\n${YELLOW}Opening Netlify dashboard...${NC}"
+netlify open
