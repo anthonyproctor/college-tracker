@@ -23,31 +23,52 @@ echo "Building backend..."
 npm install
 npm run build
 
+# Check required environment variables
+if [ -z "$RENDER_API_KEY" ]; then
+    echo -e "${RED}Error: RENDER_API_KEY is not set${NC}"
+    echo "Please set up your environment variables in .env.deploy"
+    exit 1
+fi
+
+if [ -z "$MONGODB_URI" ]; then
+    echo -e "${RED}Error: MONGODB_URI is not set${NC}"
+    echo "Please set up your MongoDB connection string in .env.deploy"
+    exit 1
+fi
+
 # Deploy to Render using environment variables
 echo "Deploying to Render..."
-RENDER_API_KEY=$RENDER_API_KEY
 SERVICE_NAME="college-tracker-api"
 
-curl -X POST "https://api.render.com/v1/services" \
-  -H "Authorization: Bearer $RENDER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "'$SERVICE_NAME'",
-    "owner": "anthonyproctor",
-    "repo": "https://github.com/anthonyproctor/college-tracker",
-    "branch": "main",
-    "autoDeploy": true,
+# Prepare environment variables for Render
+ENV_VARS=$(cat << EOF
+{
     "envVars": [
-      {
-        "key": "NODE_ENV",
-        "value": "production"
-      },
-      {
-        "key": "PORT",
-        "value": "10000"
-      }
+        {"key": "NODE_ENV", "value": "production"},
+        {"key": "PORT", "value": "10000"},
+        {"key": "MONGODB_URI", "value": "$MONGODB_URI"},
+        {"key": "JWT_SECRET", "value": "$JWT_SECRET"},
+        {"key": "JWT_EXPIRE", "value": "$JWT_EXPIRE"},
+        {"key": "EMAIL_SERVICE", "value": "$EMAIL_SERVICE"},
+        {"key": "EMAIL_USER", "value": "$EMAIL_USER"},
+        {"key": "EMAIL_PASSWORD", "value": "$EMAIL_PASSWORD"}
     ]
-  }'
+}
+EOF
+)
+
+# Create service on Render
+curl -X POST "https://api.render.com/v1/services" \
+    -H "Authorization: Bearer $RENDER_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+        \"name\": \"$SERVICE_NAME\",
+        \"owner\": \"anthonyproctor\",
+        \"repo\": \"https://github.com/anthonyproctor/college-tracker\",
+        \"branch\": \"main\",
+        \"autoDeploy\": true,
+        \"envVars\": $(echo $ENV_VARS | jq .envVars)
+    }"
 
 # Wait for backend deployment
 echo "Waiting for backend deployment to complete..."
