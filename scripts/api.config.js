@@ -1,4 +1,4 @@
-// Production API configuration
+// Production API configuration for College Tracker
 export const API_CONFIG = {
     BASE_URL: window.location.hostname === 'localhost'
         ? 'http://localhost:5001/api/v1'
