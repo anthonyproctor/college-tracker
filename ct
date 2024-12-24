@@ -1,0 +1,144 @@
+#!/bin/bash
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Show help message
+show_help() {
+    echo -e "${BLUE}College Tracker CLI${NC}"
+    echo
+    echo "Usage: ./ct <command> [options]"
+    echo
+    echo "Commands:"
+    echo "  dev         Start development environment"
+    echo "  setup       Set up development environment"
+    echo "  deploy      Deploy to production"
+    echo "  monitor     Monitor application status"
+    echo "  logs        View application logs"
+    echo "  db         Database operations"
+    echo
+    echo "Options:"
+    echo "  dev:"
+    echo "    --reset   Reset development environment"
+    echo
+    echo "  monitor:"
+    echo "    dev      Monitor development environment"
+    echo "    prod     Monitor production environment"
+    echo
+    echo "  logs:"
+    echo "    dev      View development logs"
+    echo "    prod     View production logs"
+    echo
+    echo "  db:"
+    echo "    setup    Set up test database"
+    echo "    reset    Reset database"
+    echo "    backup   Backup database"
+    echo
+    echo "Examples:"
+    echo "  ./ct dev              # Start development servers"
+    echo "  ./ct deploy           # Deploy to production"
+    echo "  ./ct monitor dev      # Monitor development environment"
+    echo "  ./ct db setup         # Set up test database"
+}
+
+# Check if command exists
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+fi
+
+# Process commands
+case "$1" in
+    "dev")
+        if [ "$2" == "--reset" ]; then
+            ./setup-dev.sh
+        fi
+        ./dev.sh
+        ;;
+    
+    "setup")
+        ./setup-dev.sh
+        ;;
+    
+    "deploy")
+        if [ ! -f ".env.deploy.local" ]; then
+            echo -e "${RED}Error: .env.deploy.local not found${NC}"
+            echo "Please create it first:"
+            echo "cp .env.deploy .env.deploy.local"
+            exit 1
+        fi
+        source .env.deploy.local && ./deploy-production.sh
+        ;;
+    
+    "monitor")
+        case "$2" in
+            "dev"|"prod")
+                ./monitor.sh "$2"
+                ;;
+            *)
+                echo -e "${RED}Error: Please specify environment (dev/prod)${NC}"
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "logs")
+        case "$2" in
+            "dev")
+                if [ -f "backend/logs/app.log" ]; then
+                    tail -f backend/logs/app.log
+                else
+                    echo "No development logs found"
+                fi
+                ;;
+            "prod")
+                if [ -z "${RENDER_API_KEY}" ]; then
+                    echo -e "${RED}Error: RENDER_API_KEY not set${NC}"
+                    exit 1
+                fi
+                curl -H "Authorization: Bearer $RENDER_API_KEY" \
+                    "https://api.render.com/v1/services/srv-something/logs"
+                ;;
+            *)
+                echo -e "${RED}Error: Please specify environment (dev/prod)${NC}"
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "db")
+        case "$2" in
+            "setup")
+                cd backend && npm run setup-db
+                ;;
+            "reset")
+                mongo college-tracker --eval "db.dropDatabase()"
+                cd backend && npm run setup-db
+                ;;
+            "backup")
+                timestamp=$(date +%Y%m%d_%H%M%S)
+                mongodump --db college-tracker --out "./backups/backup_$timestamp"
+                echo -e "${GREEN}Database backed up to ./backups/backup_$timestamp${NC}"
+                ;;
+            *)
+                echo -e "${RED}Error: Invalid database command${NC}"
+                echo "Available commands: setup, reset, backup"
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    "help"|"--help"|"-h")
+        show_help
+        ;;
+    
+    *)
+        echo -e "${RED}Error: Unknown command '$1'${NC}"
+        show_help
+        exit 1
+        ;;
+esac
