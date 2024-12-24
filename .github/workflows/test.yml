@@ -1,0 +1,72 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+        mongodb-version: ['4.4', '5.0']
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.10.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+    
+    - name: Install Dependencies
+      run: |
+        cd backend
+        npm ci
+    
+    - name: Run Tests
+      run: |
+        cd backend
+        npm test
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test-secret-key
+        JWT_EXPIRE: 1h
+    
+    - name: Upload Coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-${{ matrix.node-version }}-${{ matrix.mongodb-version }}
+        path: backend/coverage
+        retention-days: 5
+
+  notify:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Test Status
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const testStatus = '${{ needs.test.result }}'
+          const success = testStatus === 'success'
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `Tests ${success ? 'passed ✅' : 'failed ❌'}\n\nNode.js versions tested: 16.x, 18.x\nMongoDB versions tested: 4.4, 5.0`
+          })

@@ -19,7 +19,8 @@ show_help() {
     echo "  deploy      Deploy to production"
     echo "  monitor     Monitor application status"
     echo "  logs        View application logs"
-    echo "  db         Database operations"
+    echo "  db          Database operations"
+    echo "  test        Run tests"
     echo
     echo "Options:"
     echo "  dev:"
@@ -38,11 +39,16 @@ show_help() {
     echo "    reset    Reset database"
     echo "    backup   Backup database"
     echo
+    echo "  test:"
+    echo "    backend   Run backend tests"
+    echo "    watch    Run tests in watch mode"
+    echo "    coverage Generate test coverage report"
+    echo
     echo "Examples:"
     echo "  ./ct dev              # Start development servers"
     echo "  ./ct deploy           # Deploy to production"
     echo "  ./ct monitor dev      # Monitor development environment"
-    echo "  ./ct db setup         # Set up test database"
+    echo "  ./ct test backend     # Run backend tests"
 }
 
 # Check if command exists
@@ -128,6 +134,23 @@ case "$1" in
                 echo -e "${RED}Error: Invalid database command${NC}"
                 echo "Available commands: setup, reset, backup"
                 exit 1
+                ;;
+        esac
+        ;;
+
+    "test")
+        case "$2" in
+            "backend")
+                cd backend && NODE_ENV=test npm test
+                ;;
+            "watch")
+                cd backend && NODE_ENV=test npm run test:watch
+                ;;
+            "coverage")
+                cd backend && NODE_ENV=test npm run test:coverage
+                ;;
+            *)
+                cd backend && NODE_ENV=test npm test
                 ;;
         esac
         ;;
