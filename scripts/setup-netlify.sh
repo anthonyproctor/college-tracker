@@ -21,22 +21,9 @@ if ! netlify status &> /dev/null; then
     netlify init
 fi
 
-# Configure environment variables
-echo -e "\n${YELLOW}Configuring environment variables...${NC}"
-netlify env:set API_URL "https://college-tracker-api.onrender.com/api/v1" --context production --force
-netlify env:set API_URL "https://college-tracker-api-staging.onrender.com/api/v1" --context branch --force
-
-# Create deploy hook
-echo -e "\n${YELLOW}Creating deploy hook...${NC}"
-netlify deploy-hooks:create --name "Production Deploy" --branch main
-
-# Configure build settings
-echo -e "\n${YELLOW}Configuring build settings...${NC}"
-netlify build:settings set-mode manual
-
-# Enable branch deploys
-echo -e "\n${YELLOW}Enabling branch deploys and deploy previews...${NC}"
-netlify site:config --branch-deploy=true --deploy-preview=true
+# Deploy current state
+echo -e "\n${YELLOW}Deploying current state...${NC}"
+netlify deploy --prod
 
 # Show configuration
 echo -e "\n${YELLOW}Current configuration:${NC}"
@@ -44,14 +31,23 @@ netlify status
 
 echo -e "\n${GREEN}Netlify configuration complete!${NC}"
 echo -e "\n${YELLOW}Next steps:${NC}"
-echo "1. Visit Netlify dashboard to verify settings:"
-echo "   netlify open"
-echo "2. Configure custom domain (if needed):"
-echo "   netlify domains:add your-domain.com"
-echo "3. Test automatic deployments by pushing changes"
-echo "4. View deployment status:"
-echo "   netlify deploy:list"
+echo "1. Visit Netlify dashboard to configure:"
+echo "   - Environment variables"
+echo "   - Build settings"
+echo "   - Deploy hooks"
+echo "   - Branch deploys"
+echo "2. Configure custom domain (if needed)"
+echo "3. Set up continuous deployment:"
+echo "   - Go to Site settings > Build & deploy"
+echo "   - Connect to Git repository"
+echo "   - Configure build settings:"
+echo "     * Base directory: ."
+echo "     * Build command: (leave empty)"
+echo "     * Publish directory: ."
+echo "4. Configure environment variables:"
+echo "   - Go to Site settings > Environment variables"
+echo "   - Add API_URL for production and preview"
 
 # Open Netlify dashboard
 echo -e "\n${YELLOW}Opening Netlify dashboard...${NC}"
-netlify open --admin
+netlify open:admin

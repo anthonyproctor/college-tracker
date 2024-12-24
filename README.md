@@ -2,7 +2,19 @@
 
 A modern web application for tracking and managing college applications with automated deadline reminders and status tracking.
 
-🌟 **Live Demo**: [https://musical-dragon-a3a076.netlify.app](https://musical-dragon-a3a076.netlify.app)
+🌟 **Live Demo**: [https://college-tracker-app.netlify.app](https://college-tracker-app.netlify.app)
+
+## Project Structure
+
+```
+college-tracker/
+├── backend/           # Node.js/Express backend
+├── docs/             # Documentation
+├── cypress/          # End-to-end tests
+├── scripts/          # Utility scripts
+├── styles/          # CSS styles
+└── *.html           # Frontend pages
+```
 
 ## Features
 
@@ -27,6 +39,12 @@ A modern web application for tracking and managing college applications with aut
 - Real-time updates
 - Intuitive navigation
 
+## Documentation
+
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Backend API](backend/README.md)
+- [Testing Guide](docs/TESTING.md)
+
 ## Quick Start
 
 ### Prerequisites
@@ -34,83 +52,65 @@ A modern web application for tracking and managing college applications with aut
 - MongoDB
 - Git
 
-### Local Development
+### Development
 
-1. Clone the repository:
+1. Clone and Install:
 ```bash
 git clone https://github.com/anthonyproctor/college-tracker.git
 cd college-tracker
+./scripts/setup-dev.sh
 ```
 
-2. Set up the backend:
+2. Start Development Servers:
 ```bash
-cd backend
-cp .env.example .env
-npm install
-npm run dev
+./ct dev
 ```
 
-3. Start the frontend:
+3. Run Tests:
 ```bash
-# From project root
-npx http-server -p 3000
+# Backend tests
+./ct test backend
+
+# End-to-end tests
+./ct test e2e
 ```
 
-4. Visit `http://localhost:3000` in your browser
+### Deployment
 
-## Deployment
-
-### One-Click Deploy
-1. Fork this repository
-2. Click the deploy buttons below:
-
-[![Deploy Backend to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
-[![Deploy Frontend to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/anthonyproctor/college-tracker)
-
-### Manual Deployment
-Follow the instructions in [backend/DEPLOY.md](backend/DEPLOY.md) for detailed deployment steps.
-
-## Environment Variables
-
-### Backend (.env)
-```
-NODE_ENV=development
-PORT=5001
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-EMAIL_SERVICE=gmail
-EMAIL_USER=your_email
-EMAIL_PASSWORD=your_email_password
+1. Configure Secrets:
+```bash
+# Set up environment variables
+cp .env.deploy .env.deploy.local
+nano .env.deploy.local
 ```
 
-### Frontend (api.config.js)
-```javascript
-export const API_CONFIG = {
-    BASE_URL: 'http://localhost:5001/api/v1'
-};
+2. Deploy:
+```bash
+./scripts/deploy.sh
 ```
 
-## API Documentation
+View the [Deployment Guide](docs/DEPLOYMENT.md) for detailed instructions.
 
-### Auth Endpoints
-- `POST /api/v1/auth/register` - Create new account
-- `POST /api/v1/auth/login` - Login
-- `GET /api/v1/auth/me` - Get current user
+## Environment Setup
 
-### Applications Endpoints
-- `GET /api/v1/applications` - List all applications
-- `POST /api/v1/applications` - Create application
-- `PUT /api/v1/applications/:id` - Update application
-- `DELETE /api/v1/applications/:id` - Delete application
+### Development
+```bash
+# Backend
+cp backend/.env.example backend/.env
+nano backend/.env
 
-## Contributing
+# Frontend
+cp scripts/api.config.example.js scripts/api.config.js
+nano scripts/api.config.js
+```
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+### Production
+```bash
+# Copy deployment config
+cp .env.deploy .env.deploy.local
 
+# Edit configuration
+nano .env.deploy.local
 ## Support
 
 - 📧 Email: anthonyproctor@gmail.com

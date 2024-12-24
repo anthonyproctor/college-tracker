@@ -39,5 +39,5 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://*.render.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://college-tracker-api.onrender.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self';"
     Cache-Control = "public, max-age=31536000"

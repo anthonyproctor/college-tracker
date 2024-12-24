@@ -1,5 +1,8 @@
+// Import API Configuration
+import { API_CONFIG } from './api.config.js';
+
 // API Configuration
-const API_URL = 'http://localhost:5001/api/v1';
+const API_URL = API_CONFIG.BASE_URL;
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {

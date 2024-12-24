@@ -17,9 +17,11 @@ const app = express();
 // Security middleware
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? 'https://your-production-domain.com' 
+        ? 'https://college-tracker-app.netlify.app'
         : 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 

@@ -2,21 +2,21 @@ services:
   - type: web
     name: college-tracker-api
     env: node
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm start
+    buildCommand: cd backend && npm install && npm run build && cd dist && npm install --production
+    startCommand: cd backend/dist && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: MONGODB_URI
-        sync: false # Will be set manually in Render dashboard
+        value: mongodb+srv://college-tracker-admin:4!mps0N4@devconnector.kjngi.mongodb.net/college-tracker?retryWrites=true&w=majority
       - key: JWT_SECRET
         generateValue: true # Automatically generate a secure value
       - key: JWT_EXPIRE
         value: 24h
       - key: FRONTEND_URL
-        sync: false # Will be set after Netlify deployment
+        value: https://college-tracker-app.netlify.app
       - key: EMAIL_SERVICE
         value: gmail
       - key: EMAIL_USER
