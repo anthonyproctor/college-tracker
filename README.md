@@ -1,120 +1,121 @@
 # College Application Tracker
 
-A web application to help students track and manage their college applications.
+A modern web application for tracking and managing college applications with automated deadline reminders and status tracking.
+
+🌟 **Live Demo**: [https://musical-dragon-a3a076.netlify.app](https://musical-dragon-a3a076.netlify.app)
 
 ## Features
 
-- User authentication (signup/login)
-- Track multiple college applications
+✨ **Core Features**
+- User authentication with secure signup/login
+- Track multiple college applications in one place
 - Manage application requirements and deadlines
-- Status tracking (Not Started, In Progress, Submitted)
-- Email notifications for deadlines and updates
+- Real-time status tracking
+- Email notifications for deadlines
 - Weekly summary reports
 
-## Tech Stack
+🔒 **Security**
+- JWT-based authentication
+- Secure password hashing
+- Rate limiting
+- CORS protection
+- XSS prevention
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js, Express
-- Database: MongoDB
-- Authentication: JWT
-- Email: Nodemailer
+📱 **User Experience**
+- Clean, modern interface
+- Mobile-responsive design
+- Real-time updates
+- Intuitive navigation
 
-## Local Development Setup
+## Quick Start
+
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB
+- Git
+
+### Local Development
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/anthonyproctor/college-tracker.git
 cd college-tracker
 ```
 
-2. Install dependencies:
+2. Set up the backend:
 ```bash
-# Backend dependencies
 cd backend
-npm install
-
-# Frontend dependencies (if using package manager)
-cd ../frontend
-npm install
-```
-
-3. Set up environment variables:
-```bash
-# In backend directory
 cp .env.example .env
-# Edit .env with your local configuration
-```
-
-4. Start MongoDB:
-```bash
-brew services start mongodb-community
-```
-
-5. Start the development servers:
-```bash
-# Backend (from backend directory)
+npm install
 npm run dev
+```
 
-# Frontend (from project root)
+3. Start the frontend:
+```bash
+# From project root
 npx http-server -p 3000
 ```
 
-## Production Deployment
+4. Visit `http://localhost:3000` in your browser
 
-### Backend Deployment (Render)
+## Deployment
 
-1. Create a new Web Service on Render
-2. Connect your GitHub repository
-3. Configure environment variables (see .env.production.example)
-4. Set build command: `npm install && npm run build`
-5. Set start command: `npm start`
+### One-Click Deploy
+1. Fork this repository
+2. Click the deploy buttons below:
 
-### Frontend Deployment (Netlify)
+[![Deploy Backend to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+[![Deploy Frontend to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/anthonyproctor/college-tracker)
 
-1. Create a new site on Netlify
-2. Connect your GitHub repository
-3. Configure build settings:
-   - Base directory: `/`
-   - Build command: (none required for static files)
-   - Publish directory: `/`
-4. Update API URL in `scripts/api.js` to point to your production backend
-
-### MongoDB Atlas Setup
-
-1. Create a free cluster on MongoDB Atlas
-2. Create a database user
-3. Get your connection string
-4. Add connection string to your backend environment variables
+### Manual Deployment
+Follow the instructions in [backend/DEPLOY.md](backend/DEPLOY.md) for detailed deployment steps.
 
 ## Environment Variables
 
-### Development
-See `.env.example` for required environment variables.
+### Backend (.env)
+```
+NODE_ENV=development
+PORT=5001
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+EMAIL_SERVICE=gmail
+EMAIL_USER=your_email
+EMAIL_PASSWORD=your_email_password
+```
 
-### Production
-See `.env.production.example` for required environment variables.
+### Frontend (api.config.js)
+```javascript
+export const API_CONFIG = {
+    BASE_URL: 'http://localhost:5001/api/v1'
+};
+```
 
 ## API Documentation
 
-### Authentication Endpoints
-- POST `/api/v1/auth/register` - Register new user
-- POST `/api/v1/auth/login` - Login user
-- GET `/api/v1/auth/me` - Get current user
+### Auth Endpoints
+- `POST /api/v1/auth/register` - Create new account
+- `POST /api/v1/auth/login` - Login
+- `GET /api/v1/auth/me` - Get current user
 
-### Application Endpoints
-- GET `/api/v1/applications` - Get all applications
-- POST `/api/v1/applications` - Create new application
-- PUT `/api/v1/applications/:id` - Update application
-- DELETE `/api/v1/applications/:id` - Delete application
+### Applications Endpoints
+- `GET /api/v1/applications` - List all applications
+- `POST /api/v1/applications` - Create application
+- `PUT /api/v1/applications/:id` - Update application
+- `DELETE /api/v1/applications/:id` - Delete application
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
+
+## Support
+
+- 📧 Email: anthonyproctor@gmail.com
+- 🐛 Issues: [GitHub Issues](https://github.com/anthonyproctor/college-tracker/issues)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
