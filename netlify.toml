@@ -1,19 +1,38 @@
-[build]
+# Production context: all deploys from the Production branch set in your site's
+# deploy contexts will inherit these settings.
+[context.production]
   publish = "."
-  command = ""  # No build command needed for static files
+  command = ""
 
+# Deploy Preview context: all deploys generated from a pull/merge request will
+# inherit these settings.
+[context.deploy-preview]
+  publish = "."
+  command = ""
+
+# Branch Deploy context: all deploys that are not from a pull/merge request or
+# from the Production branch will inherit these settings.
+[context.branch-deploy]
+  publish = "."
+  command = ""
+
+# Specific branch context: all deploys from this specific branch will inherit
+# these settings.
+[context.staging] # 'staging' is a branch name
+  publish = "."
+  command = ""
+
+# For more information see: https://www.netlify.com/docs/netlify-toml-reference/
+
+# Redirects and headers are GLOBAL for all builds – they do not get scoped to
+# contexts no matter where you define them in the file.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[context.production.environment]
-  REACT_APP_API_URL = "https://college-tracker-api.onrender.com/api/v1"
-
-[context.deploy-preview.environment]
-  REACT_APP_API_URL = "https://college-tracker-api-staging.onrender.com/api/v1"
-
 [[headers]]
+  # Define which paths this specific [[headers]] block will cover.
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
@@ -21,16 +40,4 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "default-src 'self'; connect-src 'self' https://*.render.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
-
-[dev]
-  command = "./ct dev"
-  port = 3000
-  publish = "."
-
-# Branch deploys
-[context.branch-deploy]
-  command = ""
-
-# Deploy Preview context
-[context.deploy-preview]
-  command = ""
+    Cache-Control = "public, max-age=31536000"
