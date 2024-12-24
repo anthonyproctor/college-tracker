@@ -1,11 +1,17 @@
 [build]
-  publish = "/"
+  publish = "."
   command = ""  # No build command needed for static files
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[context.production.environment]
+  REACT_APP_API_URL = "https://college-tracker-api.onrender.com/api/v1"
+
+[context.deploy-preview.environment]
+  REACT_APP_API_URL = "https://college-tracker-api-staging.onrender.com/api/v1"
 
 [[headers]]
   for = "/*"
@@ -15,3 +21,16 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "default-src 'self'; connect-src 'self' https://*.render.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';"
+
+[dev]
+  command = "./ct dev"
+  port = 3000
+  publish = "."
+
+# Branch deploys
+[context.branch-deploy]
+  command = ""
+
+# Deploy Preview context
+[context.deploy-preview]
+  command = ""
