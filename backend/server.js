@@ -1,0 +1,85 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const scheduler = require('./utils/scheduler');
+
+// Load environment variables
+dotenv.config();
+
+// Route files
+const auth = require('./routes/auth');
+const applications = require('./routes/applications');
+
+// Create Express app
+const app = express();
+
+// Security middleware
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? 'https://your-production-domain.com' 
+        : 'http://localhost:3000',
+    credentials: true
+}));
+app.use(express.json());
+
+// Rate limiting
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use('/api/', limiter);
+
+// Security headers
+const helmet = require('helmet');
+app.use(helmet());
+
+// Prevent XSS attacks
+const xss = require('xss-clean');
+app.use(xss());
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+// Mount routers
+app.use('/api/v1/auth', auth);
+app.use('/api/v1/applications', applications);
+
+// Basic route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to College Application Tracker API' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        error: process.env.NODE_ENV === 'production' 
+            ? 'Something went wrong!' 
+            : err.message
+    });
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err, promise) => {
+    console.log(`Error: ${err.message}`);
+    // Close server & exit process
+    server.close(() => process.exit(1));
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    
+    // Initialize scheduler
+    scheduler.init();
+    console.log('Scheduler initialized: Daily checks at 9 AM, Weekly summaries on Sundays at 10 AM');
+});

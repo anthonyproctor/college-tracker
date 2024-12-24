@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Application Tracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">College Tracker</div>
+        <div class="nav-links">
+            <a href="signup.html" class="cta-btn" style="margin-right: 1rem;">Sign Up</a>
+            <a href="login.html" class="login-btn">Login</a>
+        </div>
+    </nav>
+
+    <main class="hero">
+        <div class="hero-content">
+            <h1>Track Your College Applications</h1>
+            <p>Stay organized and never miss a deadline with our comprehensive college application tracking system.</p>
+            <div class="cta-buttons">
+                <a href="login.html" class="cta-btn">Get Started</a>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>Track Deadlines</h3>
+                <p>Keep track of all your application deadlines in one place</p>
+            </div>
+            <div class="feature-card">
+                <h3>Application Status</h3>
+                <p>Monitor the status of each application in real-time</p>
+            </div>
+            <div class="feature-card">
+                <h3>Document Management</h3>
+                <p>Organize all your application documents efficiently</p>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { api } from './scripts/api.js';
+
+        // Redirect to dashboard if already logged in
+        if (api.auth.isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - College Application Tracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <a href="index.html" style="text-decoration: none; color: inherit;">College Tracker</a>
+        </div>
+    </nav>
+
+    <div class="login-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Login to Your Account</h2>
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+            <p style="text-align: center; margin-top: 1rem;">
+                Don't have an account? <a href="signup.html" style="color: var(--secondary-color);">Sign up</a>
+            </p>
+        </form>
+    </div>
+
+    <script type="module">
+        import { api } from './scripts/api.js';
+
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.createElement('div');
+        errorMessage.style.cssText = 'color: #e74c3c; margin-bottom: 1rem; text-align: center; display: none;';
+        loginForm.insertBefore(errorMessage, loginForm.querySelector('button'));
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.style.display = 'none';
+
+            try {
+                const credentials = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
+
+                await api.auth.login(credentials);
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Redirect if already logged in
+        if (api.auth.isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
