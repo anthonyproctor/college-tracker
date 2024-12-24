@@ -7,14 +7,28 @@ const User = require('../models/User');
 let mongoServer;
 
 beforeAll(async () => {
+    // Disconnect from any existing connection
+    await mongoose.disconnect();
+    
+    // Create new in-memory MongoDB instance
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    
+    // Connect to the in-memory database
+    await mongoose.connect(mongoUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    });
 });
 
 afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    // Clean up
+    if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect();
+    }
+    if (mongoServer) {
+        await mongoServer.stop();
+    }
 });
 
 beforeEach(async () => {
